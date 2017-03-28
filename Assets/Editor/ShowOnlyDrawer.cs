@@ -22,6 +22,9 @@ public class ShowOnlyDrawer : PropertyDrawer
             case SerializedPropertyType.String:
                 valueStr = prop.stringValue;
                 break;
+            case SerializedPropertyType.Enum:
+                valueStr = prop.enumValueIndex.ToString();
+                break;
             default:
                 valueStr = "(not supported)";
                 break;

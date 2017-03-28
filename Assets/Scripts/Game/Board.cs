@@ -3,8 +3,8 @@
     private int InternalValue { get; set; }
 
     public static readonly int Blank = 0;
-    public static readonly int AI = -1;
-    public static readonly int Player = 1;
+    public static readonly int AI = 1;
+    public static readonly int Player = -1;
 
     public override bool Equals(object obj)
     {
