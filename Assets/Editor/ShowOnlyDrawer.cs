@@ -23,7 +23,7 @@ public class ShowOnlyDrawer : PropertyDrawer
                 valueStr = prop.stringValue;
                 break;
             case SerializedPropertyType.Enum:
-                valueStr = prop.enumValueIndex.ToString();
+                valueStr = prop.enumNames[prop.enumValueIndex];
                 break;
             default:
                 valueStr = "(not supported)";

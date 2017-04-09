@@ -14,6 +14,7 @@ public class GameMaster : MonoBehaviour {
     }
 
     private GameInfo GI = null;
+    private PlayerData PD = null;
 
     [Header("Info")]
 
@@ -25,10 +26,10 @@ public class GameMaster : MonoBehaviour {
     [ShowOnly]
     private TurnMode currentTurnMove = TurnMode.Nothing;
 
-    [Header("Variables")]
+    [Header("References")]
 
     [SerializeField]
-    private Tween m_tweenScript;
+    private TweenFunction m_tweenScript;
     [SerializeField]
     private LineRenderer m_WinStreakVisual;
     [SerializeField]
@@ -47,7 +48,15 @@ public class GameMaster : MonoBehaviour {
     [SerializeField]
     private Camera m_currentCamera;
 
+    [SerializeField]
+    private Animator m_WhiteWipe;
+
+    [SerializeField]
+    private Image m_EndScreenBackground;
+
     private Board m_board;
+
+    [Header("Variables")]
 
     public EasingFunction.Ease m_MarkerAnimationStyle = EasingFunction.Ease.EaseOutSine;
     public float m_MarkerAnimationDuration = 3.0f;
@@ -75,7 +84,7 @@ public class GameMaster : MonoBehaviour {
 
     private GameObject[] m_markers;
 
-    private Color m_BackgroundColorGoTo = Color.black;
+    private Color m_BackgroundColorGoTo = Color.white;
     private Vector3 m_backgroundVel = Vector3.zero;
 
     // Determines if a player has won, returns 0 otherwise.
@@ -95,10 +104,21 @@ public class GameMaster : MonoBehaviour {
 
     private bool m_turnOver = false;
 
-	// Use this for initialization
-	void Start () {
+    private void OnEnable()
+    {
+        //PlayerData.OnScoreChanged
+    }
+
+    // Use this for initialization
+    void Start () {
+
+        m_WhiteWipe.SetTrigger("WipeOut");
+
         // Get game info
         GI = GameInfo.GetInstance();
+
+        // Get player data
+        PD = PlayerData.GetInstance();
 
         m_board = new Board();
         m_markers = new GameObject[9];
@@ -124,6 +144,9 @@ public class GameMaster : MonoBehaviour {
     /// <returns></returns>
     IEnumerator GameLoop()
     {
+        // Delay start for wipe animation
+        yield return new WaitForSeconds(0.5f);
+
         int player = GI.GetPlayerFirst() ? 1 : 2;
 
         for (m_turns = 0; m_turns < 9 && Win(m_board) == 0; ++m_turns)
@@ -166,19 +189,37 @@ public class GameMaster : MonoBehaviour {
             case 0:
                 Debug.Log("A draw. How droll.\n");
                 m_BackgroundColorGoTo = Color.black;
-                UpdateText("Tie game!", new Color(Convert8ToFloat(50.0f), Convert8ToFloat(50.0f), Convert8ToFloat(50.0f)));
+                UpdateText("Tie game!", 
+                    new Color(
+                        Convert8ToFloat(50.0f), 
+                        Convert8ToFloat(50.0f), 
+                        Convert8ToFloat(50.0f)
+                        )
+                    );
                 break;
             case 1:
                 Debug.Log("You lose.\n");
                 WinVisual(m_WinPositions);
                 UpdateText("AI won!", GetMarkerColor(AIMarker));
+                yield return PD.ActiveSave.m_TotalLosses++;
                 break;
             case -1:
                 Debug.Log("You win.\n");
                 WinVisual(m_WinPositions);
                 UpdateText("You win!", GetMarkerColor(playerMarker));
+                yield return PD.ActiveSave.m_TotalWins++;
                 break;
         }
+
+        m_EndScreenBackground.color = m_BackgroundColorGoTo;
+
+        yield return new WaitForSeconds(1.0f);
+
+        m_WhiteWipe.SetTrigger("WipeIn");
+
+        yield return new WaitForSeconds(1.0f);
+
+        m_WhiteWipe.SetTrigger("WipeOut");
     }
 
     /// <summary>
