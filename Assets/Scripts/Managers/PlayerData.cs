@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerData {
 
     private static PlayerData instance = null;
+
+    private static bool B_WIPE_ALL_DATA = true;
 
     public enum SaveEventMessages
     {
@@ -21,6 +21,10 @@ public class PlayerData {
     private const string K_HIGHSCORE = "highScoreKey";
     private const string K_SAVE1 = "save1Key";
     private const string K_SAVE2 = "save2Key";
+
+    // /////////
+    // Variables
+    // /////////
 
     private int m_Score;
     private int m_HighScore;
@@ -42,37 +46,40 @@ public class PlayerData {
     // Save 2
     private SaveData m_Save2;
 
+    // ///////////
     // Constructor
+    // ///////////
+
     private PlayerData()
     {
         // Getting local data...
 
-        // High score
+        // Loading high score
         m_HighScore = PlayerPrefs.GetInt(K_HIGHSCORE);
 
         // Saves
         string[] temp;
 
+        // Loading saved data 1
         temp = PlayerPrefsX.GetStringArray(K_SAVE1);
 
         // Extracting saved data 1
         if (SaveData.StringArrayToSaveData(temp) == null) 
         {
-            Debug.Assert(true, "Save 1 is corrupted! Reformatting data...");
-            PlayerPrefsX.SetStringArray(K_SAVE1, new string[2]);
+            Debug.Assert(true, "Save 1 is corrupted!");
         }
         else
         {
             m_Save1 = SaveData.StringArrayToSaveData(temp);
         }
 
+        // Loading saved data 2
         temp = PlayerPrefsX.GetStringArray(K_SAVE2);
 
         // Extracting saved data 2
         if (SaveData.StringArrayToSaveData(temp) == null)
         {
-            Debug.Assert(true, "Save 1 is corrupted! Reformatting data...");
-            PlayerPrefsX.SetStringArray(K_SAVE2, new string[2]);
+            Debug.Assert(true, "Save 1 is corrupted!");
         }
         else
         {
@@ -80,6 +87,14 @@ public class PlayerData {
         }
     }
 
+    // ///////////////////
+    // Getters and Setters
+    // ///////////////////
+
+    /// <summary>
+    /// Gets current instance of PlayerData
+    /// </summary>
+    /// <returns></returns>
     public static PlayerData GetInstance()
     {
         if (instance == null)
@@ -89,20 +104,50 @@ public class PlayerData {
         return instance;
     }
 
+    /// <summary>
+    /// Returns current saved data in the first slot
+    /// </summary>
+    /// <returns>Save data</returns>
     public SaveData GetSavedData1()
     {
+        // Checks if save slot 1 exists
+        if (m_Save1 == null)
+        {
+            // Creates new slot if empty
+            m_Save1 = new SaveData();
+        }
+
         return m_Save1;
     }
 
+    /// <summary>
+    /// Returns current saved data in the second slot
+    /// </summary>
+    /// <returns>Save data</returns>
     public SaveData GetSavedData2()
     {
+        // Checks if save slot 2 exists
+        if (m_Save2 == null)
+        {
+            // Creates new slot if empty
+            m_Save2 = new SaveData();
+        }
+
         return m_Save2;
     }
 
+    /// <summary>
+    /// Currently used save
+    /// </summary>
     public SaveData ActiveSave
     {
         get
         {
+            if (m_ActiveSave == null)
+            {
+                m_ActiveSave = new SaveData();
+            }
+
             return m_ActiveSave;
         }
         set
@@ -111,13 +156,23 @@ public class PlayerData {
         }
     }
 
+    /// <summary>
+    /// Returns the current score
+    /// </summary>
+    /// <returns>Score</returns>
     public int GetCurrentScore()
     {
         return m_Score;
     }
 
+    /// <summary>
+    /// Returns the current high score
+    /// </summary>
+    /// <returns>High score</returns>
     public int GetHighScore()
     {
+        m_ShowHighScoreAlert = true;
+
         return m_HighScore;
     }
 
@@ -137,6 +192,10 @@ public class PlayerData {
         OnScoreChanged();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public SaveEventMessages OverrideSaveData()
     {
         if (m_ActiveSave == null)
@@ -158,6 +217,10 @@ public class PlayerData {
         return SaveEventMessages.UndocumentedBehaviour;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public SaveEventMessages SetSaveData()
     {
         if (m_ActiveSave == null)
@@ -178,6 +241,8 @@ public class PlayerData {
         {
             PlayerPrefsX.SetStringArray(K_SAVE2, SaveData.SaveDataToStringArray(m_Save2));
         }
+
+        PlayerPrefs.SetInt(K_HIGHSCORE, m_HighScore);
 
         return SaveEventMessages.SaveSuccess;
     }

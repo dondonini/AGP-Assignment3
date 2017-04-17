@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,9 +50,6 @@ public class GameMaster : MonoBehaviour {
     [SerializeField]
     private Animator m_WhiteWipe;
 
-    [SerializeField]
-    private Image m_EndScreenBackground;
-
     private Board m_board;
 
     [Header("Variables")]
@@ -66,6 +62,8 @@ public class GameMaster : MonoBehaviour {
     public Vector3 m_WinLineOffset = new Vector3(0.0f, 0.0f, -1.0f);
 
     public float m_BackgroundColorAnimationDamp = 1.0f;
+    [Range(0.0f, 2.0f)]
+    public float m_BackgroundColorBrightness = 1.0f;
 
     public float m_AITurnDuration = 1.0f;
 
@@ -135,7 +133,29 @@ public class GameMaster : MonoBehaviour {
 
     void Update()
     {
-        m_currentCamera.backgroundColor = ColorSmoothDamp(m_currentCamera.backgroundColor, m_BackgroundColorGoTo, ref m_backgroundVel, m_BackgroundColorAnimationDamp);
+        // Changes background dynamically
+        if (m_BackgroundColorBrightness > 1.0f)
+        {
+            Color goalColor = Color.Lerp(m_BackgroundColorGoTo, Color.white, m_BackgroundColorBrightness - 1.0f);
+
+            m_currentCamera.backgroundColor = ExtendedFunctions.ColorSmoothDamp
+            (
+                m_currentCamera.backgroundColor,
+                goalColor,
+                ref m_backgroundVel,
+                m_BackgroundColorAnimationDamp
+            );
+        }
+        else
+        {
+            m_currentCamera.backgroundColor = ExtendedFunctions.ColorSmoothDamp
+            (
+                m_currentCamera.backgroundColor, 
+                m_BackgroundColorGoTo * m_BackgroundColorBrightness, 
+                ref m_backgroundVel, 
+                m_BackgroundColorAnimationDamp
+            );
+        }
     }
 
     /// <summary>
@@ -191,9 +211,9 @@ public class GameMaster : MonoBehaviour {
                 m_BackgroundColorGoTo = Color.black;
                 UpdateText("Tie game!", 
                     new Color(
-                        Convert8ToFloat(50.0f), 
-                        Convert8ToFloat(50.0f), 
-                        Convert8ToFloat(50.0f)
+                        ExtendedFunctions.Convert8ToFloat(50.0f),
+                        ExtendedFunctions.Convert8ToFloat(50.0f),
+                        ExtendedFunctions.Convert8ToFloat(50.0f)
                         )
                     );
                 break;
@@ -210,8 +230,6 @@ public class GameMaster : MonoBehaviour {
                 yield return PD.ActiveSave.m_TotalWins++;
                 break;
         }
-
-        m_EndScreenBackground.color = m_BackgroundColorGoTo;
 
         yield return new WaitForSeconds(1.0f);
 
@@ -436,38 +454,13 @@ public class GameMaster : MonoBehaviour {
         {
             case MarkerType.O:
                 //return m_oMarker.GetComponent<Shader>().GetColor("_Color");
-                return m_oMarker.GetComponentInChildren<Renderer>().sharedMaterial.color;
+                return ExtendedFunctions.GetColorOfGameObject(m_oMarker);
             case MarkerType.X:
                 //return m_xMarker.GetComponent<Material>().GetColor("_Color");
-                return m_xMarker.GetComponentInChildren<Renderer>().sharedMaterial.color;
+                return ExtendedFunctions.GetColorOfGameObject(m_xMarker);
             default:
                 return Color.black;
         }
-    }
-
-    Color ColorSmoothDamp(Color current, Color target, ref Vector3 velocity, float smoothTime)
-    {
-        Vector3 c = ColorToVector3(current);
-        Vector3 t = ColorToVector3(target);
-
-        Vector3 temp = Vector3.SmoothDamp(c, t, ref velocity, smoothTime);
-
-        return Vector3ToColor(temp);
-    }
-
-    Vector3 ColorToVector3(Color newColor)
-    {
-        return new Vector3(newColor.r, newColor.g, newColor.b);
-    }
-
-    Color Vector3ToColor(Vector3 newVector3)
-    {
-        return new Color(newVector3.x, newVector3.y, newVector3.z);
-    }
-
-    float Convert8ToFloat(float new8Bit)
-    {
-        return new8Bit / 255.0f;
     }
 
     void WinVisual(int[] winPositions)
