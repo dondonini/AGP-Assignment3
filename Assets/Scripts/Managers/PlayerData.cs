@@ -137,6 +137,42 @@ public class PlayerData {
     }
 
     /// <summary>
+    /// Loads the given save
+    /// </summary>
+    /// <param name="toLoad"></param>
+    public bool LoadSave(SaveData toLoad)
+    {
+        if (toLoad.GetSaveID() == GetSavedData1().GetSaveID() || toLoad.GetSaveID() == GetSavedData2().GetSaveID())
+        {
+            ActiveSave = toLoad;
+        }
+
+        return true;
+    }
+
+    public bool SaveSave(int slot)
+    {
+        switch(slot)
+        {
+            case 0:
+                m_Save1 = ActiveSave;
+                break;
+            case 1:
+                m_Save2 = ActiveSave;
+                break;
+        }
+
+        SaveEventMessages result = SetSaveData();
+
+        Debug.Log(result.ToString());
+
+        if (result == SaveEventMessages.SaveSuccess)
+            return true;
+
+        return false;
+    }
+
+    /// <summary>
     /// Currently used save
     /// </summary>
     public SaveData ActiveSave
@@ -233,13 +269,20 @@ public class PlayerData {
             return SaveEventMessages.SaveOverrideSuccess;
         }
 
+        string[] temp;
+
         if (m_Save1.GetSaveID() == m_ActiveSave.GetSaveID())
         {
-            PlayerPrefsX.SetStringArray(K_SAVE1, SaveData.SaveDataToStringArray(m_Save1));
+            temp = SaveData.SaveDataToStringArray(m_Save1);
+
+            ExtendedFunctions.PrintArray(temp);
+
+            PlayerPrefsX.SetStringArray(K_SAVE1, temp);
         }
         else if (m_Save2.GetSaveID() == m_ActiveSave.GetSaveID())
         {
-            PlayerPrefsX.SetStringArray(K_SAVE2, SaveData.SaveDataToStringArray(m_Save2));
+            temp = SaveData.SaveDataToStringArray(m_Save2);
+            PlayerPrefsX.SetStringArray(K_SAVE2, temp);
         }
 
         PlayerPrefs.SetInt(K_HIGHSCORE, m_HighScore);

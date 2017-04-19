@@ -121,8 +121,10 @@ public class GameMaster : MonoBehaviour {
         m_board = new Board();
         m_markers = new GameObject[9];
 
-        GI.SetPlayerMarker(MarkerType.O);
-        GI.SetPlayerFirst(true);
+        if (GI.GetPlayerMarker() == MarkerType.NULL)
+        {
+            GI.SetPlayerMarker(MarkerType.O);
+        }
 
         playerMarker = GI.GetPlayerMarker();
         AIMarker = GI.GetAIMarker();
@@ -216,18 +218,21 @@ public class GameMaster : MonoBehaviour {
                         ExtendedFunctions.Convert8ToFloat(50.0f)
                         )
                     );
+
+                GI.SetLatestWinner(GameOutcome.Tie);
+
                 break;
             case 1:
                 Debug.Log("You lose.\n");
                 WinVisual(m_WinPositions);
                 UpdateText("AI won!", GetMarkerColor(AIMarker));
-                yield return PD.ActiveSave.m_TotalLosses++;
+                LoseState();
                 break;
             case -1:
                 Debug.Log("You win.\n");
                 WinVisual(m_WinPositions);
                 UpdateText("You win!", GetMarkerColor(playerMarker));
-                yield return PD.ActiveSave.m_TotalWins++;
+                WinState();
                 break;
         }
 
@@ -235,9 +240,18 @@ public class GameMaster : MonoBehaviour {
 
         m_WhiteWipe.SetTrigger("WipeIn");
 
-        yield return new WaitForSeconds(1.0f);
+    }
 
-        m_WhiteWipe.SetTrigger("WipeOut");
+    void WinState()
+    {
+        PD.ActiveSave.m_TotalWins++;
+        GI.SetLatestWinner(GameOutcome.PlayerWon);
+    }
+
+    void LoseState()
+    {
+        PD.ActiveSave.m_TotalLosses++;
+        GI.SetLatestWinner(GameOutcome.AIWon);
     }
 
     /// <summary>

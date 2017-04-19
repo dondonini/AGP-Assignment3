@@ -91,6 +91,8 @@ public class SaveData
         // Getting save total losses
         newSaveData.m_TotalLosses = int.Parse(newData[2]);
 
+        newSaveData.m_SaveID = int.Parse(newData[3]);
+
         return newSaveData;
     }
 
@@ -108,6 +110,8 @@ public class SaveData
         tempData[1] = newData.m_TotalWins.ToString();
 
         tempData[2] = newData.m_TotalLosses.ToString();
+
+        tempData[3] = newData.m_SaveID.ToString();
 
         return tempData;
     }
@@ -130,7 +134,7 @@ public class SaveData
         Random.InitState((int)currentTime);
 
         // Generating unique ID
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 5; i++)
         {
             int randomNum = Random.Range(0, 9);
 

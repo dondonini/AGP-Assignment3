@@ -64,4 +64,14 @@ public class ExtendedFunctions {
     {
         return newObject.GetComponentInChildren<Renderer>().sharedMaterial.color;
     }
+
+    public static void PrintArray(string[] array)
+    {
+        Debug.Log("Printing array: " + array);
+
+        for (int i = 0; i < array.Length; i++)
+        {
+            Debug.Log("Index: " + i + "\t Data: " + array[i]);
+        }
+    }
 }

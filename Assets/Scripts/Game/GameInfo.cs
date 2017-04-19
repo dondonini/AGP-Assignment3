@@ -8,6 +8,13 @@ public enum MarkerType
     O = 2
 }
 
+public enum GameOutcome
+{
+    Tie,
+    PlayerWon,
+    AIWon
+}
+
 public class GameInfo
 {
     private static GameInfo instance = null;
@@ -15,6 +22,7 @@ public class GameInfo
     private MarkerType m_PlayerMarker = MarkerType.NULL;
     private MarkerType m_AIMarker = MarkerType.NULL;
     private bool m_PlayerFirst = false;
+    private GameOutcome m_LatestWinner = GameOutcome.Tie;
 
     // ///////////
     // Constructor
@@ -97,6 +105,24 @@ public class GameInfo
     public bool GetPlayerFirst()
     {
         return m_PlayerFirst;
+    }
+
+    /// <summary>
+    /// Sets the winner of the latest game
+    /// </summary>
+    /// <param name="whoWon">The winner</param>
+    public void SetLatestWinner(GameOutcome whoWon)
+    {
+        m_LatestWinner = whoWon;
+    }
+
+    /// <summary>
+    /// Returns who won the latest game
+    /// </summary>
+    /// <returns>The winner.</returns>
+    public GameOutcome GetLatestWinner()
+    {
+        return m_LatestWinner;
     }
 
 
